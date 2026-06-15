@@ -15,6 +15,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 1.5rem;
+        box-sizing: border-box;
         background: #02030a;
         color: #e8f8ff;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, "Trebuchet MS",
@@ -25,6 +27,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        width: min(100%, 56rem);
+        text-align: center;
         gap: 1.25rem;
       }
 
@@ -34,8 +38,15 @@
         letter-spacing: 0.2em;
         font-size: clamp(2.5rem, 8vw, 6rem);
         font-weight: 700;
+        text-align: center;
         text-shadow: 0.03em 0 0 #3ff, -0.03em 0 0 #f0f, 0 0 0.6em #3ff;
         animation: glitch 900ms infinite;
+      }
+
+      @media (max-width: 600px) {
+        .hero {
+          letter-spacing: 0.12em;
+        }
       }
 
       .hero::before,
