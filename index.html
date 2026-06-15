@@ -4,6 +4,74 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>await greatness</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #02030a;
+        color: #e8f8ff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, "Trebuchet MS",
+          "Lucida Sans Unicode", sans-serif;
+      }
+
+      .hero {
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: clamp(2.5rem, 8vw, 6rem);
+        font-weight: 700;
+        text-shadow: 0.03em 0 0 #3ff, -0.03em 0 0 #f0f, 0 0 0.6em #3ff;
+        animation: glitch 900ms infinite;
+      }
+
+      .hero::before,
+      .hero::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .hero::before {
+        color: #4bf;
+        transform: translate(-0.02em, -0.02em);
+        opacity: 0.7;
+      }
+
+      .hero::after {
+        color: #f5f;
+        transform: translate(0.02em, 0.02em);
+        opacity: 0.55;
+      }
+
+      @keyframes glitch {
+        0%,
+        100% {
+          transform: translate(0);
+        }
+        20% {
+          transform: translate(-0.01em, 0.01em);
+        }
+        40% {
+          transform: translate(0.015em, -0.005em);
+        }
+        60% {
+          transform: translate(-0.005em, -0.015em);
+        }
+        80% {
+          transform: translate(0.01em, 0.005em);
+        }
+      }
+    </style>
   </head>
-  <body>await greatness</body>
+  <body>
+    <div class="hero" data-text="await greatness">await greatness</div>
+  </body>
 </html>
