@@ -21,6 +21,13 @@
           "Lucida Sans Unicode", sans-serif;
       }
 
+      .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+      }
+
       .hero {
         position: relative;
         text-transform: uppercase;
@@ -69,9 +76,180 @@
           transform: translate(0.01em, 0.005em);
         }
       }
+
+      #countdown {
+        font-size: clamp(1.2rem, 4vw, 2.2rem);
+        letter-spacing: 0.08em;
+      }
+
+      #countdown.random {
+        color: #ff3030;
+      }
     </style>
   </head>
   <body>
-    <div class="hero" data-text="await greatness">await greatness</div>
+    <div class="content">
+      <div class="hero" data-text="await greatness">await greatness</div>
+      <div id="countdown" aria-live="polite"></div>
+    </div>
+    <script>
+      const stockholmTimeZone = "Europe/Stockholm";
+      const countdownElement = document.getElementById("countdown");
+      let previousMode = "";
+      let randomDigits = "";
+
+      const dateFormatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: stockholmTimeZone,
+        weekday: "short",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+
+      function getStockholmParts(date) {
+        const parts = dateFormatter.formatToParts(date);
+        const values = {};
+        for (const part of parts) {
+          if (part.type !== "literal") {
+            values[part.type] = part.value;
+          }
+        }
+        return {
+          weekday: values.weekday,
+          year: Number(values.year),
+          month: Number(values.month),
+          day: Number(values.day),
+          hour: Number(values.hour),
+          minute: Number(values.minute),
+          second: Number(values.second),
+        };
+      }
+
+      function getTimeZoneOffsetMillis(timeZone, timestamp) {
+        const offsetFormatter = new Intl.DateTimeFormat("en-US", {
+          timeZone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        });
+        const parts = offsetFormatter.formatToParts(new Date(timestamp));
+        const values = {};
+        for (const part of parts) {
+          if (part.type !== "literal") {
+            values[part.type] = part.value;
+          }
+        }
+        const asUtcMillis = Date.UTC(
+          Number(values.year),
+          Number(values.month) - 1,
+          Number(values.day),
+          Number(values.hour),
+          Number(values.minute),
+          Number(values.second)
+        );
+        return asUtcMillis - timestamp;
+      }
+
+      function zonedToUtcMillis(year, month, day, hour, minute, second, timeZone) {
+        const utcGuess = Date.UTC(year, month - 1, day, hour, minute, second);
+        let timestamp = utcGuess;
+        for (let index = 0; index < 3; index += 1) {
+          const offset = getTimeZoneOffsetMillis(timeZone, timestamp);
+          timestamp = utcGuess - offset;
+        }
+        return timestamp;
+      }
+
+      function generateRandomDigits() {
+        return Array.from(
+          { length: 10 },
+          () => Math.floor(Math.random() * 10)
+        ).join("");
+      }
+
+      function getFridayCountdownSeconds(now) {
+        const current = getStockholmParts(now);
+        const weekdayMap = {
+          Sun: 0,
+          Mon: 1,
+          Tue: 2,
+          Wed: 3,
+          Thu: 4,
+          Fri: 5,
+          Sat: 6,
+        };
+
+        const weekday = weekdayMap[current.weekday];
+        let daysUntilFriday = (5 - weekday + 7) % 7;
+        const isFridayPastCutoff =
+          weekday === 5 && current.hour >= 16;
+
+        if (daysUntilFriday === 0 && isFridayPastCutoff) {
+          daysUntilFriday = 7;
+        }
+
+        const targetDate = new Date(
+          Date.UTC(current.year, current.month - 1, current.day) +
+            daysUntilFriday * 24 * 60 * 60 * 1000
+        );
+
+        const targetMillis = zonedToUtcMillis(
+          targetDate.getUTCFullYear(),
+          targetDate.getUTCMonth() + 1,
+          targetDate.getUTCDate(),
+          16,
+          0,
+          0,
+          stockholmTimeZone
+        );
+
+        return Math.max(0, Math.floor((targetMillis - now.getTime()) / 1000));
+      }
+
+      function shouldShowRandom(now) {
+        const current = getStockholmParts(now);
+        const weekdayMap = {
+          Sun: 0,
+          Mon: 1,
+          Tue: 2,
+          Wed: 3,
+          Thu: 4,
+          Fri: 5,
+          Sat: 6,
+        };
+        const weekday = weekdayMap[current.weekday];
+        const isAfterFridayCutoff =
+          weekday === 5 && current.hour >= 16;
+        return isAfterFridayCutoff || weekday === 6 || weekday === 0;
+      }
+
+      function renderCountdown() {
+        const now = new Date();
+        if (shouldShowRandom(now)) {
+          if (previousMode !== "random") {
+            randomDigits = generateRandomDigits();
+          }
+          countdownElement.textContent = randomDigits;
+          countdownElement.classList.add("random");
+          previousMode = "random";
+          return;
+        }
+
+        countdownElement.textContent = String(getFridayCountdownSeconds(now));
+        countdownElement.classList.remove("random");
+        previousMode = "timer";
+      }
+
+      renderCountdown();
+      setInterval(renderCountdown, 1000);
+    </script>
   </body>
 </html>
