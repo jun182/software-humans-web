@@ -95,6 +95,15 @@
     <script>
       const stockholmTimeZone = "Europe/Stockholm";
       const countdownElement = document.getElementById("countdown");
+      const weekdayMap = {
+        Sun: 0,
+        Mon: 1,
+        Tue: 2,
+        Wed: 3,
+        Thu: 4,
+        Fri: 5,
+        Sat: 6,
+      };
       let previousMode = "";
       let randomDigits = "";
 
@@ -177,16 +186,6 @@
 
       function getFridayCountdownSeconds(now) {
         const current = getStockholmParts(now);
-        const weekdayMap = {
-          Sun: 0,
-          Mon: 1,
-          Tue: 2,
-          Wed: 3,
-          Thu: 4,
-          Fri: 5,
-          Sat: 6,
-        };
-
         const weekday = weekdayMap[current.weekday];
         let daysUntilFriday = (5 - weekday + 7) % 7;
         const isFridayPastCutoff =
@@ -216,15 +215,6 @@
 
       function shouldShowRandom(now) {
         const current = getStockholmParts(now);
-        const weekdayMap = {
-          Sun: 0,
-          Mon: 1,
-          Tue: 2,
-          Wed: 3,
-          Thu: 4,
-          Fri: 5,
-          Sat: 6,
-        };
         const weekday = weekdayMap[current.weekday];
         const isAfterFridayCutoff =
           weekday === 5 && current.hour >= 16;
